@@ -73,8 +73,8 @@ function getSmartFallback(message) {
 }
 
 async function generateResponse(message) {
-    const { parseLearningIntent } = require('./platformRanker');
-    const { searchAllPlatforms } = require('./multiSourceSearch');
+    const parseLearningIntent = require('../services/platformRanker').parseLearningIntent;
+    const { searchAllPlatforms } = require('../services/multiSourceSearch');
     
     const lower = message.toLowerCase();
     const learningIntent = parseLearningIntent(message);
