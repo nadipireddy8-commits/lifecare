@@ -17,12 +17,14 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
+// MOUNT ROUTES WITH /api PREFIX
 app.use('/api/auth', authRoutes);
 app.use('/api/actions', actionRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/insights', insightRoutes);
 app.use('/api/assistant', assistantRoutes);
 
+// Test route
 app.get('/api/test', (req, res) => res.json({ message: 'API works' }));
 
 const PORT = process.env.PORT || 5000;
