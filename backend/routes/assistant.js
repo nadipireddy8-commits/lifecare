@@ -12,50 +12,33 @@ if (!apiKey || apiKey.startsWith('Alza')) {
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Enhanced fallback (covers emotions, sleep, productivity, etc.)
+// Enhanced fallback (used only if Gemini fails)
 function getSmartFallback(message) {
     const lower = message.toLowerCase();
 
-    // Emotions
-    if (lower.includes('emotion') || lower.includes('feeling')) {
-        if (lower.includes('control') || lower.includes('manage')) {
-            return "To manage emotions: 1) Pause and breathe deeply. 2) Name the emotion (e.g., 'I feel angry'). 3) Identify the trigger. 4) Choose a positive action (talk, walk, journal). Need more details?";
-        }
-        return "Emotions are normal. Try labeling them, talking to someone, or practicing mindfulness. What specific emotion are you struggling with?";
-    }
     if (lower.includes('sad') || lower.includes('depressed')) {
         return "I'm sorry you're feeling down. Small steps: go outside for 5 minutes, call a friend, or write one thing you're grateful for. You matter.";
     }
     if (lower.includes('angry') || lower.includes('frustrated')) {
-        return "Anger is a signal. Take a break, count to 10, or walk away. Later, reflect on what triggered you. You can handle this.";
+        return "Anger is a signal. Take a break, count to 10, or walk away. You can handle this.";
     }
     if (lower.includes('stressed') || lower.includes('anxious')) {
-        return "Stress relief: deep breathing (4-7-8), grounding (5-4-3-2-1), or a short walk. What's one small thing you can do right now?";
+        return "Stress relief: deep breathing (4-7-8), grounding (5-4-3-2-1), or a short walk.";
     }
-
-    // Sleep
     if (lower.includes('sleep') || lower.includes('insomnia')) {
-        return "Better sleep: consistent bedtime, no screens 1 hour before, cool dark room, avoid caffeine after 2 PM. Try a relaxing routine (reading, light stretching).";
+        return "Better sleep: consistent bedtime, no screens 1 hour before, cool dark room, avoid caffeine after 2 PM.";
     }
-
-    // General
-    return "I can help with emotions, sleep, fitness, productivity, learning, and more. Could you rephrase? For example: 'How to control anger?' or 'Tips for better sleep?'";
+    if (lower.includes('learn') || lower.includes('course')) {
+        return "Try searching for free courses on YouTube, Coursera, or edX. What topic are you interested in?";
+    }
+    return "I'm here to help! Could you rephrase your question? I can answer anything about emotions, productivity, learning, fitness, relationships, and more.";
 }
 
 async function generateResponse(message) {
-    const lower = message.toLowerCase();
-
-    // Learning intent
-    if (lower.includes('learn') || lower.includes('course') || lower.includes('tutorial')) {
-        const preferences = await parseLearningIntent(message);
-        const courses = await searchAllPlatforms(message, preferences);
-        return { type: 'courses', data: courses };
-    }
-
-    // Try Gemini if available
+    // Try Gemini for EVERY question first
     if (apiKey && !apiKey.startsWith('Alza')) {
         try {
-            const prompt = `You are LifeOS, a warm, concise life coach. Answer the user's question directly and helpfully (max 3 sentences). User: "${message}"`;
+            const prompt = `You are LifeOS, a warm, helpful, and concise life coach. Answer the user's question directly and helpfully. Be supportive and practical. Keep response to 2-3 sentences. User question: "${message}"`;
             const result = await model.generateContent(prompt);
             const reply = result.response.text();
             return { type: 'advice', data: reply };
@@ -64,7 +47,7 @@ async function generateResponse(message) {
         }
     }
 
-    // Fallback
+    // If Gemini fails, use fallback
     return { type: 'advice', data: getSmartFallback(message) };
 }
 
