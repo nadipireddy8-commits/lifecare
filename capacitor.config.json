@@ -1,0 +1,9 @@
+{
+  "appId": "com.lifeos.app",
+  "appName": "LifeOS",
+  "webDir": "frontend",
+  "server": {
+    "url": "http://10.46.146.21:3000 ",
+    "androidScheme": "http"
+  }
+}
