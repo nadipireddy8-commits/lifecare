@@ -7,17 +7,14 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Pre-save hook to hash password – corrected
-userSchema.pre('save', function(next) {
+// Hash password before saving
+userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  bcrypt.hash(this.password, 10, (err, hash) => {
-    if (err) return next(err);
-    this.password = hash;
-    next();
-  });
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
-// Compare password method
+// Compare password method (used in auth.js)
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
