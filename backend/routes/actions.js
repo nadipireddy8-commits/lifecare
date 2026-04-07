@@ -5,8 +5,10 @@ const auth = require('../middleware/auth');
 
 router.post('/', auth, async (req, res) => {
   try {
-    const { actionText, category, emotion, source } = req.body;
-    const action = new Action({ userId: req.userId, actionText, category, emotion, source });
+const { actionText, category, source, mode = 'productive' } = req.body;
+    const { detectEmotion } = require('../services/sentiment');
+    const emotion = await detectEmotion(actionText);
+    const action = new Action({ userId: req.userId, actionText, category, emotion, source, mode });
     await action.save();
     res.json(action);
   } catch (err) {
